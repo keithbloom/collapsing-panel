@@ -2,24 +2,20 @@ import React, { useState, useCallback, useMemo, useEffect } from 'react';
 import './App.css';
 import Measure from 'react-measure';
 
-function ToolbarItem({ value, onSizeChange, Element }) {
+function ToolbarItem({ id, onSizeChange, children }) {
   const handleSizeChange = (contentRect) => {
-    console.log(`Item resize ${value}`);
+    console.log(`Item resize id: ${id}`);
     console.log(contentRect);
-    onSizeChange(value, contentRect);
+    onSizeChange(id, contentRect);
   };
   return (
     <Measure bounds onResize={handleSizeChange}>
-      {({ measureRef }) => (
-        <div ref={measureRef} style={{ padding: '5px', width: `${10 * value}px`, border: '1px solid green' }}>
-          Name: {value}
-        </div>
-      )}
+      {({ measureRef }) => <div ref={measureRef}>{children}</div>}
     </Measure>
   );
 }
 
-function Toolbar() {
+function Toolbar({ children }) {
   const items = Array.from(Array(10).keys());
   const [toolbarItemWidth, setToolbarItemWidth] = useState({});
   const [mainDivSize, setMainDivSize] = useState();
@@ -56,16 +52,16 @@ function Toolbar() {
     let itemsForToolbar = {};
     let currentTotalWidth = 0;
     for (const [key, value] of Object.entries(toolbarItemWidth)) {
+      currentTotalWidth = currentTotalWidth + value;
       if (currentTotalWidth >= mainDivSize) {
         console.log('Should stop now');
         break;
       }
       console.log(`currentTotalWidth: ${currentTotalWidth} value: ${value}`);
-      currentTotalWidth = currentTotalWidth + value;
       console.log(`currentTotalWidth: ${currentTotalWidth}`);
       itemsForToolbar = {
         ...itemsForToolbar,
-        [key]: value,
+        [key]: children[key],
       };
     }
     console.log(`Items for toolbar`);
@@ -80,20 +76,20 @@ function Toolbar() {
       <Measure bounds onResize={handleResize}>
         {({ measureRef }) => (
           <div ref={measureRef} style={{ display: 'flex', border: '1px dashed yellow' }}>
-            {items.map((x) => (
-              <ToolbarItem key={x} value={x} onSizeChange={onSizeChange} />
+            {children.map((x, index) => (
+              <div style={{ marginLeft: '-9999px' }}>
+                <ToolbarItem key={index} id={index} onSizeChange={onSizeChange}>
+                  {x}
+                </ToolbarItem>
+              </div>
             ))}
           </div>
         )}
       </Measure>
-      <div style={{ display: 'flex', border: '1px dashed blue' }}>
-        {Object.entries(toolbarItemsToRender).map(([key, value]) => (
-          <div key={key} value={key} style={{ padding: '5px', width: `${value}px`, border: '1px solid grey' }}>
-            Name: {key}
-          </div>
-        ))}
-      </div>
 
+      <div style={{ display: 'flex', border: '1px dashed blue' }}>
+        {Object.entries(toolbarItemsToRender).map(([key, value]) => value)}
+      </div>
       <div>
         <div>Width of all items: {allItemsWidths} </div>
         <div>Width of Toolbar container: {mainDivSize}</div>
@@ -114,7 +110,16 @@ function App() {
         <label htmlFor="box">Box width</label>
       </div>
       <div style={{ width: `${mainBoxWidth}px`, height: '300px', border: '1px solid red' }}>
-        <Toolbar />
+        <Toolbar>
+          <div style={{ margin: '20px', border: '1px solid green' }}>Hello</div>
+          <div style={{ widht: '30px', border: '2px solid orange' }}>World</div>
+          <div style={{ margin: '20px', border: '1px solid green' }}>Hello</div>
+          <div style={{ widht: '30px', border: '2px solid orange' }}>World</div>
+          <div style={{ margin: '20px', border: '1px solid green' }}>Hello</div>
+          <div style={{ widht: '30px', border: '2px solid orange' }}>World</div>
+          <div style={{ margin: '20px', border: '1px solid green' }}>Hello</div>
+          <div style={{ widht: '30px', border: '2px solid orange' }}>World</div>
+        </Toolbar>
       </div>
     </div>
   );
